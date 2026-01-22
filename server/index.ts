@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import { createServer } from 'http';
 import { Player, ChatMessage, ClientMessage, ServerMessage } from './types.js';
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -42,9 +43,23 @@ function send(playerId: string, message: ServerMessage) {
   }
 }
 
-const wss = new WebSocketServer({ port: PORT });
+// Create HTTP server for health checks
+const server = createServer((req, res) => {
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', players: players.size }));
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+});
 
-console.log(`WebSocket server running on ws://localhost:${PORT}`);
+// Attach WebSocket server to HTTP server
+const wss = new WebSocketServer({ server });
+
+server.listen(PORT, () => {
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
+});
 
 wss.on('connection', (ws: WebSocket) => {
   let playerId: string | null = null;
