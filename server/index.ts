@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Player, ChatMessage, ClientMessage, ServerMessage } from './types.js';
 
-const PORT = 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 const MAX_CHAT_HISTORY = 50;
 
 // In-memory state
